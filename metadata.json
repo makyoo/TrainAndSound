@@ -1,0 +1,5 @@
+{
+  "name": "Train Sound Physics Simulator",
+  "description": "A high-fidelity physics simulation of two trains moving towards each other, demonstrating sound wave propagation and timing intervals.",
+  "requestFramePermissions": []
+}
