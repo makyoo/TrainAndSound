@@ -162,9 +162,8 @@ const App: React.FC = () => {
         </div>
       </main>
       
-      <footer className="text-center text-slate-500 text-xs">
-        {/* Fix: Wrap text in a string literal and escape backslashes to prevent JSX from incorrectly parsing curly braces as JS expressions and backslashes as escape sequences */}
-        {"* 计算基于 $v_s = 340\\text{m/s}$ | A车发射频率间隔 $\\Delta t$"}
+      <footer className="text-center text-slate-500 text-xs font-mono">
+        {`* 计算基于 vs = ${SOUND_SPEED} m/s | A车发射频率间隔 Δt = ${config.soundInterval.toFixed(2)} s`}
       </footer>
     </div>
   );
