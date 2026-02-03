@@ -7,9 +7,9 @@ import Results from './components/Results';
 const App: React.FC = () => {
   // Configuration State
   const [config, setConfig] = useState<SimulationConfig>({
-    speedA: 50,
-    speedB: 30,
-    initialDistance: 500,
+    speedA: 40,
+    speedB: 60,
+    initialDistance: 800,
     soundInterval: 1.0,
   });
 
@@ -18,8 +18,10 @@ const App: React.FC = () => {
   const [isPlaying, setIsPlaying] = useState(true);
   
   // Ref for animation frame
-  const requestRef = useRef<number>();
-  const lastTimeRef = useRef<number>();
+  // Fix: Added undefined as initial value to satisfy TypeScript argument requirement for line 21
+  const requestRef = useRef<number | undefined>(undefined);
+  // Fix: Added undefined as initial value to satisfy TypeScript argument requirement for line 22
+  const lastTimeRef = useRef<number | undefined>(undefined);
 
   // Derived Values: Impact Calculations
   const impacts = useMemo(() => {

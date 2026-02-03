@@ -18,6 +18,10 @@ const Visualizer: React.FC<VisualizerProps> = ({ config, currentTime, impacts })
 
   const getX = (meters: number) => PADDING + meters * scale;
 
+  // Colors for Sound 1 and Sound 2
+  const COLOR_1 = "#fb923c"; // Orange 400
+  const COLOR_2 = "#2dd4bf"; // Teal 400
+
   // Calculations
   const trainAX = speedA * currentTime;
   const trainBX = initialDistance - speedB * currentTime;
@@ -25,7 +29,8 @@ const Visualizer: React.FC<VisualizerProps> = ({ config, currentTime, impacts })
   // Sound 1: Started at t=0 from x=0
   const sound1X = SOUND_SPEED * currentTime;
   const hasEmitted1 = currentTime >= 0;
-  const hasImpacted1 = currentTime >= (impacts.find(i => i.label === '声音 1')?.time ?? Infinity);
+  const imp1 = impacts.find(i => i.label === '声音 1');
+  const hasImpacted1 = currentTime >= (imp1?.time ?? Infinity);
 
   // Sound 2: Started at t=interval from x=vA * interval
   const emit2Position = speedA * soundInterval;
@@ -33,7 +38,8 @@ const Visualizer: React.FC<VisualizerProps> = ({ config, currentTime, impacts })
     ? (emit2Position + SOUND_SPEED * (currentTime - soundInterval)) 
     : -100;
   const hasEmitted2 = currentTime >= soundInterval;
-  const hasImpacted2 = currentTime >= (impacts.find(i => i.label === '声音 2')?.time ?? Infinity);
+  const imp2 = impacts.find(i => i.label === '声音 2');
+  const hasImpacted2 = currentTime >= (imp2?.time ?? Infinity);
 
   return (
     <div className="flex-1 flex items-center justify-center">
@@ -49,16 +55,16 @@ const Visualizer: React.FC<VisualizerProps> = ({ config, currentTime, impacts })
         {/* Emission Point Markers */}
         {hasEmitted1 && (
           <g transform={`translate(${getX(0)}, 200)`}>
-            <circle r="3" fill="#64748b" />
-            <line y1="-10" y2="10" stroke="#64748b" strokeWidth="1" />
-            <text y="25" textAnchor="middle" className="text-[9px] fill-slate-500 font-medium">发射点 1 (0m)</text>
+            <circle r="4" fill={COLOR_1} />
+            <line y1="-15" y2="15" stroke={COLOR_1} strokeWidth="2" />
+            <text y="30" textAnchor="middle" className="text-[10px] font-bold" fill={COLOR_1}>发射点 1 (0m)</text>
           </g>
         )}
         {hasEmitted2 && (
           <g transform={`translate(${getX(emit2Position)}, 200)`}>
-            <circle r="3" fill="#64748b" />
-            <line y1="-10" y2="10" stroke="#64748b" strokeWidth="1" />
-            <text y="25" textAnchor="middle" className="text-[9px] fill-slate-500 font-medium">发射点 2 ({emit2Position.toFixed(1)}m)</text>
+            <circle r="4" fill={COLOR_2} />
+            <line y1="-15" y2="15" stroke={COLOR_2} strokeWidth="2" />
+            <text y="30" textAnchor="middle" className="text-[10px] font-bold" fill={COLOR_2}>发射点 2 ({emit2Position.toFixed(1)}m)</text>
           </g>
         )}
 
@@ -69,8 +75,11 @@ const Visualizer: React.FC<VisualizerProps> = ({ config, currentTime, impacts })
           <text y="-45" textAnchor="middle" className="text-[14px] fill-blue-300 font-bold">火车 A</text>
           <text y="-35" textAnchor="middle" className="text-[10px] fill-blue-500 font-mono">v={speedA}m/s</text>
           {/* Whistle effect if emitting */}
-          {(Math.abs(currentTime - 0) < 0.1 || Math.abs(currentTime - soundInterval) < 0.1) && (
-            <circle r="15" fill="none" stroke="#ef4444" strokeWidth="2" className="impact-ring" />
+          {(Math.abs(currentTime - 0) < 0.1) && (
+            <circle r="15" fill="none" stroke={COLOR_1} strokeWidth="2" className="impact-ring" />
+          )}
+          {(Math.abs(currentTime - soundInterval) < 0.1) && (
+            <circle r="15" fill="none" stroke={COLOR_2} strokeWidth="2" className="impact-ring" />
           )}
         </g>
 
@@ -82,42 +91,49 @@ const Visualizer: React.FC<VisualizerProps> = ({ config, currentTime, impacts })
           <text y="-35" textAnchor="middle" className="text-[10px] fill-green-500 font-mono">v={speedB}m/s</text>
           
           {/* Impact Effects */}
-          {hasImpacted1 && Math.abs(currentTime - impacts.find(i => i.label === '声音 1')!.time) < 0.8 && (
-            <circle r="30" fill="none" stroke="#facc15" strokeWidth="4" className="impact-ring" />
+          {hasImpacted1 && Math.abs(currentTime - imp1!.time) < 0.8 && (
+            <circle r="30" fill="none" stroke={COLOR_1} strokeWidth="4" className="impact-ring" />
           )}
-          {hasImpacted2 && Math.abs(currentTime - impacts.find(i => i.label === '声音 2')!.time) < 0.8 && (
-            <circle r="40" fill="none" stroke="#f87171" strokeWidth="4" className="impact-ring" />
+          {hasImpacted2 && Math.abs(currentTime - imp2!.time) < 0.8 && (
+            <circle r="40" fill="none" stroke={COLOR_2} strokeWidth="4" className="impact-ring" />
           )}
         </g>
 
         {/* Sound 1 Dot */}
         {currentTime > 0 && !hasImpacted1 && (
           <g transform={`translate(${getX(sound1X)}, 200)`}>
-             <circle r="5" fill="#ef4444" />
-             <circle r="12" fill="none" stroke="#ef4444" strokeWidth="1" opacity="0.5" className="animate-pulse" />
-             <text y="-10" textAnchor="middle" className="text-[10px] fill-red-400 font-bold uppercase tracking-tighter">S1</text>
+             <circle r="5" fill={COLOR_1} />
+             <circle r="12" fill="none" stroke={COLOR_1} strokeWidth="1" opacity="0.5" className="animate-pulse" />
+             <text y="-10" textAnchor="middle" className="text-[10px] font-bold uppercase tracking-tighter" fill={COLOR_1}>S1</text>
           </g>
         )}
 
         {/* Sound 2 Dot */}
         {currentTime > soundInterval && !hasImpacted2 && (
           <g transform={`translate(${getX(sound2X)}, 200)`}>
-             <circle r="5" fill="#ef4444" />
-             <circle r="12" fill="none" stroke="#ef4444" strokeWidth="1" opacity="0.5" className="animate-pulse" />
-             <text y="-10" textAnchor="middle" className="text-[10px] fill-red-400 font-bold uppercase tracking-tighter">S2</text>
+             <circle r="5" fill={COLOR_2} />
+             <circle r="12" fill="none" stroke={COLOR_2} strokeWidth="1" opacity="0.5" className="animate-pulse" />
+             <text y="-10" textAnchor="middle" className="text-[10px] font-bold uppercase tracking-tighter" fill={COLOR_2}>S2</text>
           </g>
         )}
 
         {/* Impact Markers */}
-        {impacts.map((imp, idx) => (
-            currentTime >= imp.time && (
+        {impacts.map((imp, idx) => {
+            const isOccurred = currentTime >= imp.time;
+            const color = imp.label === '声音 1' ? COLOR_1 : COLOR_2;
+            // Adjust height based on index to prevent overlap
+            // Label 1 is higher (y=-110), Label 2 is lower (y=-70)
+            const yOffset = imp.label === '声音 1' ? -110 : -70;
+
+            return isOccurred && (
                 <g key={idx} transform={`translate(${getX(imp.position)}, 200)`}>
-                   <line y1="-50" y2="50" stroke="#facc15" strokeWidth="1" strokeDasharray="4,2" />
-                   <rect x="-30" y="-75" width="60" height="20" rx="4" fill="#1e293b" stroke="#facc15" strokeWidth="1" />
-                   <text y="-62" textAnchor="middle" className="text-[10px] fill-yellow-400 font-mono">{imp.time.toFixed(3)}s</text>
+                   <line y1={yOffset + 10} y2="0" stroke={color} strokeWidth="1" strokeDasharray="4,2" />
+                   <rect x="-35" y={yOffset - 10} width="70" height="20" rx="4" fill="#1e293b" stroke={color} strokeWidth="1" />
+                   <text y={yOffset + 4} textAnchor="middle" className="text-[10px] font-mono font-bold" fill={color}>{imp.time.toFixed(4)}s</text>
+                   <text y={yOffset - 15} textAnchor="middle" className="text-[9px] font-bold uppercase" fill={color}>{imp.label} 接收</text>
                 </g>
-            )
-        ))}
+            );
+        })}
       </svg>
     </div>
   );
