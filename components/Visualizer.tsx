@@ -22,6 +22,11 @@ const Visualizer: React.FC<VisualizerProps> = ({ config, currentTime, impacts })
   const COLOR_1 = "#fb923c"; // Orange 400
   const COLOR_2 = "#2dd4bf"; // Teal 400
 
+  // Collision Calculation
+  const collisionTime = initialDistance / (speedA + speedB);
+  const collisionX = speedA * collisionTime;
+  const hasCollided = currentTime >= collisionTime;
+
   // Calculations
   const trainAX = speedA * currentTime;
   const trainBX = initialDistance - speedB * currentTime;
@@ -68,36 +73,55 @@ const Visualizer: React.FC<VisualizerProps> = ({ config, currentTime, impacts })
           </g>
         )}
 
-        {/* Train A (Left) */}
-        <g transform={`translate(${getX(trainAX)}, 200)`}>
-          <rect x="-40" y="-30" width="80" height="30" fill="#3b82f6" rx="4" />
-          <path d="M40 -30 L60 -10 L60 0 L40 0 Z" fill="#3b82f6" />
-          <text y="-45" textAnchor="middle" className="text-[14px] fill-blue-300 font-bold">火车 A</text>
-          <text y="-35" textAnchor="middle" className="text-[10px] fill-blue-500 font-mono">v={speedA}m/s</text>
-          {/* Whistle effect if emitting */}
-          {(Math.abs(currentTime - 0) < 0.1) && (
-            <circle r="15" fill="none" stroke={COLOR_1} strokeWidth="2" className="impact-ring" />
-          )}
-          {(Math.abs(currentTime - soundInterval) < 0.1) && (
-            <circle r="15" fill="none" stroke={COLOR_2} strokeWidth="2" className="impact-ring" />
-          )}
-        </g>
+        {/* Train A (Left) - Hidden after collision */}
+        {!hasCollided && (
+          <g transform={`translate(${getX(trainAX)}, 200)`}>
+            <rect x="-40" y="-30" width="80" height="30" fill="#3b82f6" rx="4" />
+            <path d="M40 -30 L60 -10 L60 0 L40 0 Z" fill="#3b82f6" />
+            <text y="-45" textAnchor="middle" className="text-[14px] fill-blue-300 font-bold">火车 A</text>
+            <text y="-35" textAnchor="middle" className="text-[10px] fill-blue-500 font-mono">v={speedA}m/s</text>
+            {/* Whistle effect if emitting */}
+            {(Math.abs(currentTime - 0) < 0.1) && (
+              <circle r="15" fill="none" stroke={COLOR_1} strokeWidth="2" className="impact-ring" />
+            )}
+            {(Math.abs(currentTime - soundInterval) < 0.1) && (
+              <circle r="15" fill="none" stroke={COLOR_2} strokeWidth="2" className="impact-ring" />
+            )}
+          </g>
+        )}
 
-        {/* Train B (Right) */}
-        <g transform={`translate(${getX(trainBX)}, 200)`}>
-          <rect x="-40" y="-30" width="80" height="30" fill="#22c55e" rx="4" />
-          <path d="M-40 -30 L-60 -10 L-60 0 L-40 0 Z" fill="#22c55e" />
-          <text y="-45" textAnchor="middle" className="text-[14px] fill-green-300 font-bold">火车 B</text>
-          <text y="-35" textAnchor="middle" className="text-[10px] fill-green-500 font-mono">v={speedB}m/s</text>
-          
-          {/* Impact Effects */}
-          {hasImpacted1 && Math.abs(currentTime - imp1!.time) < 0.8 && (
-            <circle r="30" fill="none" stroke={COLOR_1} strokeWidth="4" className="impact-ring" />
-          )}
-          {hasImpacted2 && Math.abs(currentTime - imp2!.time) < 0.8 && (
-            <circle r="40" fill="none" stroke={COLOR_2} strokeWidth="4" className="impact-ring" />
-          )}
-        </g>
+        {/* Train B (Right) - Hidden after collision */}
+        {!hasCollided && (
+          <g transform={`translate(${getX(trainBX)}, 200)`}>
+            <rect x="-40" y="-30" width="80" height="30" fill="#22c55e" rx="4" />
+            <path d="M-40 -30 L-60 -10 L-60 0 L-40 0 Z" fill="#22c55e" />
+            <text y="-45" textAnchor="middle" className="text-[14px] fill-green-300 font-bold">火车 B</text>
+            <text y="-35" textAnchor="middle" className="text-[10px] fill-green-500 font-mono">v={speedB}m/s</text>
+            
+            {/* Impact Effects */}
+            {hasImpacted1 && Math.abs(currentTime - imp1!.time) < 0.8 && (
+              <circle r="30" fill="none" stroke={COLOR_1} strokeWidth="4" className="impact-ring" />
+            )}
+            {hasImpacted2 && Math.abs(currentTime - imp2!.time) < 0.8 && (
+              <circle r="40" fill="none" stroke={COLOR_2} strokeWidth="4" className="impact-ring" />
+            )}
+          </g>
+        )}
+
+        {/* Collision Effect */}
+        {hasCollided && (
+          <g transform={`translate(${getX(collisionX)}, 200)`}>
+            <path 
+              d="M-20,-20 L20,20 M-20,20 L20,-20 M-28,0 L28,0 M0,-28 L0,28" 
+              stroke="#f43f5e" 
+              strokeWidth="4" 
+              strokeLinecap="round" 
+              className="animate-pulse"
+            />
+            <text y="-40" textAnchor="middle" className="text-sm font-bold fill-rose-500 uppercase tracking-widest italic animate-bounce">Collision!</text>
+            <text y="40" textAnchor="middle" className="text-[10px] fill-rose-400 font-mono">@{collisionTime.toFixed(3)}s</text>
+          </g>
+        )}
 
         {/* Sound 1 Dot */}
         {currentTime > 0 && !hasImpacted1 && (
@@ -121,8 +145,6 @@ const Visualizer: React.FC<VisualizerProps> = ({ config, currentTime, impacts })
         {impacts.map((imp, idx) => {
             const isOccurred = currentTime >= imp.time;
             const color = imp.label === '声音 1' ? COLOR_1 : COLOR_2;
-            // Adjust height based on index to prevent overlap
-            // Label 1 is higher (y=-110), Label 2 is lower (y=-70)
             const yOffset = imp.label === '声音 1' ? -110 : -70;
 
             return isOccurred && (
