@@ -139,14 +139,8 @@ const App: React.FC = () => {
       {/* Main Content */}
       <main className="flex-1 relative p-4 flex flex-col overflow-hidden">
         <div className="flex-1 bg-slate-900/30 rounded-3xl border border-slate-800/50 relative overflow-hidden flex flex-col shadow-inner">
-          <Visualizer 
-            config={config} 
-            currentTime={currentTime} 
-            impacts={impacts} 
-          />
-          
-          {/* Timeline Bar */}
-          <div className="p-6 bg-gradient-to-t from-slate-900/80 to-transparent">
+          {/* Timeline Bar (Moved to top) */}
+          <div className="p-6 bg-gradient-to-b from-slate-900/80 to-transparent z-20">
              <div className="flex justify-between items-center mb-2 px-1">
                 <span className="text-[10px] font-mono text-slate-500">0.000s</span>
                 <span className="text-sm font-mono font-bold text-indigo-400 bg-indigo-500/10 px-3 py-0.5 rounded-full border border-indigo-500/20">
@@ -178,6 +172,12 @@ const App: React.FC = () => {
                ))}
              </div>
           </div>
+
+          <Visualizer 
+            config={config} 
+            currentTime={currentTime} 
+            impacts={impacts} 
+          />
         </div>
       </main>
 

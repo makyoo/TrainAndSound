@@ -75,6 +75,20 @@ const Visualizer: React.FC<VisualizerProps> = ({ config, currentTime, impacts })
           </g>
         )}
 
+        {/* Interval Line (Red line connecting sound 1 and sound 2) */}
+        {hasEmitted2 && !hasImpacted1 && (
+          <line 
+            x1={getX(sound1X)} 
+            y1="200" 
+            x2={getX(sound2X)} 
+            y2="200" 
+            stroke="#ef4444" 
+            strokeWidth="2" 
+            strokeDasharray="4,2"
+            className="animate-pulse"
+          />
+        )}
+
         {/* Sound 1 Pulse */}
         {currentTime > 0 && !hasImpacted1 && (
           <g transform={`translate(${getX(sound1X)}, 200)`}>
